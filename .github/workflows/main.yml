@@ -29,8 +29,6 @@ jobs:
       # Set up MSBuild.exe
       - name: Set-Up MSBuild.exe
         uses: microsoft/setup-msbuild@v1.0.1
-        with:
-          vs-version: '[16.4,16.5)'
       # Build
       - name: Build Solution SpeechRecognitionByGoogleCloud.sln
         run: msbuild SpeechRecognitionByGoogleCloud.sln -p:Configuration=Release
