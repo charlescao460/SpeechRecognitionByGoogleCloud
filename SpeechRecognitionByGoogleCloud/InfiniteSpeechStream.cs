@@ -105,7 +105,13 @@ namespace SpeechRecognitionByGoogleCloud
                 {
                     responseStream = _recognizeStream.GetResponseStream();
                 }
-                await responseStream.MoveNextAsync(cancellationToken);
+                try
+                {
+                    await responseStream.MoveNextAsync(cancellationToken);
+                }catch(System.AggregateException)
+                {
+                    Console.WriteLine("System.AggregateException");
+                }
                 var results = responseStream.Current.Results;
                 ResultArrive?.Invoke(this, new ResultArriveEventArgs(results));
             }
