@@ -50,16 +50,93 @@ namespace SpeechRecognitionByGoogleCloud
             using (WasapiCapture capture = new WasapiLoopbackCapture())
             {
                 InfiniteSpeechStream speechStream = new InfiniteSpeechStream(capture, options.VideoMode, options.SampleRate);
+
+                int lastStableLength = 0;
+                int lastSnippetLength = 0;
+                FileStream testFileStream = new FileStream("debug.txt", FileMode.Create);
+                StreamWriter testWriter = new StreamWriter(testFileStream);
+
                 speechStream.ResultArrive += (s, e) =>
                 {
-                    foreach (var result in e.Results)
+                    if (e.Results.Count == 0)
                     {
-                        Console.WriteLine(result.Alternatives[0].Transcript);
+                        return;
+                    }
+                    else if (e.Results[0].IsFinal)
+                    {
+                        lastStableLength = 0;
+                        lastSnippetLength = 0;
+                        Console.WriteLine();
+                        Console.WriteLine();
+                        Console.WriteLine(e.Results[0].Alternatives[0].Transcript);
+                        Console.WriteLine();
+                    }
+                    else if (e.Results.Count >= 1) // In a well connected network, at most 2 results in single response
+                    {
+                        string stable = e.Results[0].Alternatives[0].Transcript;
+                        if (stable.Length <= lastStableLength)
+                        {
+                            CleanCurrentConsoleLine(lastStableLength - stable.Length + lastSnippetLength);
+                        }
+                        else
+                        {
+                            CleanCurrentConsoleLine(lastSnippetLength);
+                            Console.Write(stable.Substring(lastStableLength));
+                        }
+                        lastStableLength = stable.Length;
+                        lastSnippetLength = 0;
+                        testWriter.Write($"[0] {stable.Length}");
+                        testWriter.WriteLine(stable);
+
+                        if (e.Results.Count == 2)
+                        {
+                            string snippet = e.Results[1].Alternatives[0].Transcript;
+                            Console.Write(snippet);
+                            lastSnippetLength = snippet.Length;
+                            testWriter.Write($"[1] {snippet.Length}");
+                            testWriter.WriteLine(snippet);
+                        }
+
+                        if (e.Results.Count > 2)
+                        {
+                            Console.Error.WriteLine("More than 2 results in single responses!");
+                        }
+
+                        testWriter.Flush();
+                        testFileStream.Flush();
                     }
                 };
                 speechStream.Run(CancellationToken.None).Wait();
             }
             return 0;
         }
+
+        private static void CleanCurrentConsoleLine()
+        {
+            int currentLineCursor = Console.CursorTop;
+            Console.SetCursorPosition(0, Console.CursorTop);
+            for (int i = 0; i < Console.WindowWidth; i++)
+            {
+                Console.Write(" ");
+            }
+            Console.SetCursorPosition(0, currentLineCursor);
+        }
+
+        private static void CleanCurrentConsoleLine(int length)
+        {
+            int currentLineCursor = Console.CursorTop;
+            int leftCursor = Console.CursorLeft - length;
+            if (leftCursor < 0 || length <= 0)
+            {
+                return;
+            }
+            Console.SetCursorPosition(leftCursor, currentLineCursor);
+            for (int i = 0; i < length; i++)
+            {
+                Console.Write(" ");
+            }
+            Console.SetCursorPosition(leftCursor, currentLineCursor);
+        }
+
     }
 }

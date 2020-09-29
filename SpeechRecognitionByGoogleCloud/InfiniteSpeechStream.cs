@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Google.Api.Gax.Grpc;
 using Google.Cloud.Speech.V1;
+using Grpc.Core;
 using JetBrains.Annotations;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
@@ -27,7 +28,7 @@ namespace SpeechRecognitionByGoogleCloud
         /// <summary>
         /// Rpc stream allowed continue time in seconds.
         /// </summary>
-        private const int RpcStreamLife = 290;
+        private const int RpcStreamLife = 295;
 
         /// <summary>
         /// The default sample rate that will be sent to google cloud
@@ -108,9 +109,10 @@ namespace SpeechRecognitionByGoogleCloud
                 try
                 {
                     await responseStream.MoveNextAsync(cancellationToken);
-                }catch(Exception)
+                }
+                catch (RpcException) // When _recognizeStream changes while waiting next
                 {
-                    Console.WriteLine("responseStream Exception");
+                    continue;
                 }
                 var results = responseStream.Current.Results;
                 ResultArrive?.Invoke(this, new ResultArriveEventArgs(results));
