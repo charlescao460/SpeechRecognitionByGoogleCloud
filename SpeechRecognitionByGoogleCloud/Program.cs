@@ -53,8 +53,6 @@ namespace SpeechRecognitionByGoogleCloud
 
                 int lastStableLength = 0;
                 int lastSnippetLength = 0;
-                FileStream testFileStream = new FileStream("debug.txt", FileMode.Create);
-                StreamWriter testWriter = new StreamWriter(testFileStream);
 
                 speechStream.ResultArrive += (s, e) =>
                 {
@@ -83,27 +81,22 @@ namespace SpeechRecognitionByGoogleCloud
                             CleanCurrentConsoleLine(lastSnippetLength);
                             Console.Write(stable.Substring(lastStableLength));
                         }
+
                         lastStableLength = stable.Length;
                         lastSnippetLength = 0;
-                        testWriter.Write($"[0] {stable.Length}");
-                        testWriter.WriteLine(stable);
-
+                        
                         if (e.Results.Count == 2)
                         {
                             string snippet = e.Results[1].Alternatives[0].Transcript;
                             Console.Write(snippet);
                             lastSnippetLength = snippet.Length;
-                            testWriter.Write($"[1] {snippet.Length}");
-                            testWriter.WriteLine(snippet);
+
                         }
 
                         if (e.Results.Count > 2)
                         {
                             Console.Error.WriteLine("More than 2 results in single responses!");
                         }
-
-                        testWriter.Flush();
-                        testFileStream.Flush();
                     }
                 };
                 speechStream.Run(CancellationToken.None).Wait();
