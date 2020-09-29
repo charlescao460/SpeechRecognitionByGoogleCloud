@@ -34,7 +34,7 @@ jobs:
         run: msbuild SpeechRecognitionByGoogleCloud.sln -p:Configuration=Release
       # Zip outputs
       - name: Zip Artifacts
-        run: powershell Compress-Archive SpeechRecognitionByGoogleCloud\bin\Release\* SpeechRecognition.Build#${{ github.run_id }}.zip
+        run: powershell Compress-Archive SpeechRecognitionByGoogleCloud\bin\Release\* SpeechRecognition.Build#${{ github.run_number }}.zip
       # Create Release
       - name: Create Release
         id: create_release

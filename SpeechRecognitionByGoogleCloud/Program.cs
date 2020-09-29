@@ -66,8 +66,6 @@ namespace SpeechRecognitionByGoogleCloud
                         lastSnippetLength = 0;
                         Console.WriteLine();
                         Console.WriteLine();
-                        Console.WriteLine(e.Results[0].Alternatives[0].Transcript);
-                        Console.WriteLine();
                     }
                     else if (e.Results.Count >= 1) // In a well connected network, at most 2 results in single response
                     {
@@ -104,32 +102,33 @@ namespace SpeechRecognitionByGoogleCloud
             return 0;
         }
 
-        private static void CleanCurrentConsoleLine()
-        {
-            int currentLineCursor = Console.CursorTop;
-            Console.SetCursorPosition(0, Console.CursorTop);
-            for (int i = 0; i < Console.WindowWidth; i++)
-            {
-                Console.Write(" ");
-            }
-            Console.SetCursorPosition(0, currentLineCursor);
-        }
-
         private static void CleanCurrentConsoleLine(int length)
         {
-            int currentLineCursor = Console.CursorTop;
-            int leftCursor = Console.CursorLeft - length;
-            if (leftCursor < 0 || length <= 0)
+            if (length <= 0)
             {
                 return;
             }
-            Console.SetCursorPosition(leftCursor, currentLineCursor);
-            for (int i = 0; i < length; i++)
+            int currentLineCursor = Console.CursorTop;
+            int leftCursor = Console.CursorLeft - length;
+            if (leftCursor < 0)
             {
-                Console.Write(" ");
+                leftCursor = Console.WindowWidth + leftCursor;
+                --currentLineCursor;
             }
-            Console.SetCursorPosition(leftCursor, currentLineCursor);
-        }
 
+            try
+            {
+                Console.SetCursorPosition(leftCursor, currentLineCursor);
+                for (int i = 0; i < length; i++)
+                {
+                    Console.Write(" ");
+                }
+                Console.SetCursorPosition(leftCursor, currentLineCursor);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Console.Error.WriteLine("\n\nDo not resize while a new line is near.\n");
+            }
+        }
     }
 }
