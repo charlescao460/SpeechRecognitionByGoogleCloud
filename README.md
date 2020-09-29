@@ -1,6 +1,6 @@
 # SpeechRecognitionByGoogleCloud
 A .NET program that captures local audio and recognizes speech
-
+![](https://github.com/charlescao460/SpeechRecognitionByGoogleCloud/blob/master/pictures/SpeechRecognitionDemo.gif)
 ## Usage
 1. Go to Google Cloud's [Speech-to-Text](https://cloud.google.com/speech-to-text/docs/quickstart-client-libraries) console.
 2. Enable Speech-to-Text API.
