@@ -66,7 +66,10 @@ namespace SpeechRecognitionByGoogleCloud
         /// <param name="wasapiCapture">A WasapiCapture that must be in stopped state. It will be disposed with this stream.</param>
         /// <param name="video">If use video enhanced model.</param>
         /// <param name="sampleRate">The sample rate of data sent to google.</param>
-        public InfiniteSpeechStream([NotNull] WasapiCapture wasapiCapture, bool video = false, [NonNegativeValue] int sampleRate = DefaultReSampleRate)
+        public InfiniteSpeechStream([NotNull] WasapiCapture wasapiCapture,
+            bool video = false,
+            [NonNegativeValue] int sampleRate = DefaultReSampleRate,
+            [NotNull] string language = LanguageCodes.English.UnitedStates)
         {
             _wasapiCapture = wasapiCapture;
             GoogleCloudSpeechClient = SpeechClient.Create();
@@ -77,16 +80,18 @@ namespace SpeechRecognitionByGoogleCloud
             _reSamplerWaveProvider = new BufferedWaveProvider(wasapiCapture.WaveFormat) { ReadFully = false };
             _reSampler = new MediaFoundationResampler(_reSamplerWaveProvider, new WaveFormat(sampleRate, 16, 1));
             _convertedBuffer = new byte[_reSampler.WaveFormat.AverageBytesPerSecond * 10];
+            bool supportEnhanced = language == LanguageCodes.English.UnitedStates;
+            string model = supportEnhanced ? (video ? "video" : "phone_call") : "default";
             _recognitionConfig = new StreamingRecognitionConfig()
             {
                 Config = new RecognitionConfig()
                 {
                     Encoding = RecognitionConfig.Types.AudioEncoding.Linear16,
                     SampleRateHertz = sampleRate,
-                    LanguageCode = LanguageCodes.English.UnitedStates,
-                    UseEnhanced = true,
+                    LanguageCode = language,
+                    UseEnhanced = supportEnhanced,
                     EnableAutomaticPunctuation = true,
-                    Model = video ? "video" : "phone_call"
+                    Model = model
                 },
                 InterimResults = true,
             };

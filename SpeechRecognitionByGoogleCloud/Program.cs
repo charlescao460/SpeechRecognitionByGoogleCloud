@@ -25,6 +25,12 @@ namespace SpeechRecognitionByGoogleCloud
             [Option(shortName: 'v', longName: "video", Required = false, Default = false, HelpText = "Specify if use the video model, which does better for high sample rate audio.")]
             public bool VideoMode { get; set; }
 
+            [Option(shortName: 'm', longName: "microphone", Required = false, Default = false, HelpText = "Use microphone as input instead of WASAPI loopback.")]
+            public bool Microphone { get; set; }
+
+            [Option(shortName: 'l', longName: "language", Required = false, Default = LanguageCodes.English.UnitedStates, HelpText = "Language codes listed on: https://cloud.google.com/speech-to-text/docs/languages")]
+            public string Language { get; set; }
+
         }
 
         private static int Main(string[] args)
@@ -47,9 +53,9 @@ namespace SpeechRecognitionByGoogleCloud
         /// </summary>
         private static int RunAndReturn(Options options)
         {
-            using (WasapiCapture capture = new WasapiLoopbackCapture())
+            using (WasapiCapture capture = options.Microphone ? new WasapiCapture() : new WasapiLoopbackCapture())
             {
-                InfiniteSpeechStream speechStream = new InfiniteSpeechStream(capture, options.VideoMode, options.SampleRate);
+                InfiniteSpeechStream speechStream = new InfiniteSpeechStream(capture, options.VideoMode, options.SampleRate, options.Language);
 
                 int lastStableLength = 0;
                 int lastSnippetLength = 0;
@@ -82,7 +88,7 @@ namespace SpeechRecognitionByGoogleCloud
 
                         lastStableLength = stable.Length;
                         lastSnippetLength = 0;
-                        
+
                         if (e.Results.Count == 2)
                         {
                             string snippet = e.Results[1].Alternatives[0].Transcript;
