@@ -42,8 +42,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.run_id }}
-          release_name: Release ${{ github.run_id }}
+          tag_name: ${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
           draft: false
           prerelease: false
       # Upload Release 
@@ -54,6 +54,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: SpeechRecognition.Build#${{ github.run_id }}.zip
-          asset_name: SpeechRecognition.Build#${{ github.run_id }}.zip
+          asset_path: SpeechRecognition.Build#${{ github.run_number }}.zip
+          asset_name: SpeechRecognition.Build#${{ github.run_number }}.zip
           asset_content_type: application/zip
